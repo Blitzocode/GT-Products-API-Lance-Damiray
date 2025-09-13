@@ -1,17 +1,18 @@
 {
-  "name": "guided-work",
+  "name": "express-separation-of-concerns-lab",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
-  },
-  "description": ""
+    "dotenv": "^17.2.2",
+    "express": "^4.18.2",
+    "mysql2": "^3.14.5"
+  }
 }
