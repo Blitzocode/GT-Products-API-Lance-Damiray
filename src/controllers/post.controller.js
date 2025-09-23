@@ -43,3 +43,7 @@ export const createPost = asyncHandler(async (req, res) => {
         .status(201)
         .json(new ApiResponse(201, newPost, "Post created successfully"));
 });
+
+export const partiallyUpdatePost = (req, res) => {
+  // Your update logic here
+};
