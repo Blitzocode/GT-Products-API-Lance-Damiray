@@ -1,18 +1,20 @@
 import express from 'express';
 import postRoutes from './src/routes/post.routes.js';
+import { userRoutes } from './src/routes/user.routes.js';
 import { testConnection } from './src/config/db.js';
-import { errorHandler } from './src/middlewares/errorHandler.middleware.js'; // IMPORT
+import { errorHandler } from './src/middlewares/errorHandler.middleware.js';
 
 const app = express();
-const port = 3000;
-app.use('/posts', postRoutes);
+const port = process.env.PORT || 3000;
+
 app.use(express.json());
 
-// Mount the post routes
+app.use('/api/users', userRoutes);
 app.use('/posts', postRoutes);
+
 app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
-    testConnection(); // Test the database connection on startup
+    testConnection();
 });
