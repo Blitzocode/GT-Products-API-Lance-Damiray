@@ -32,7 +32,7 @@ export const updatePost = async (id, postData) => {
         [title, content, id]
     );
     if (result.affectedRows === 0) {
-        return null;
+        throw new ApiError(404, "Post not found"); // Throws a specific error
     }
     return getPostById(id);
 };
@@ -52,13 +52,16 @@ export const partiallyUpdatePost = async (id, updates) => {
     );
 
     if (result.affectedRows === 0) {
-        return null;
+        throw new ApiError(404, "Post not found"); // Throws a specific error
     }
     return getPostById(id);
 };
 
 export const deletePost = async (id) => {
     const [result] = await pool.query('DELETE FROM posts WHERE id = ?', [id]);
-    return result.affectedRows > 0;
+    if (result.affectedRows === 0) {
+        throw new ApiError(404, "Post not found"); // Throws a specific error
+    }
+    return true;
 };
 
