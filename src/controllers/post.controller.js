@@ -38,10 +38,9 @@ export const deletePost = asyncHandler(async (req, res) => {
 });
 
 export const createPost = asyncHandler(async (req, res) => {
-    const newPost = await postService.createPost(req.body);
-    return res
-        .status(201)
-        .json(new ApiResponse(201, newPost, "Post created successfully"));
+  const { title, content, authorId } = req.body;
+  const post = await postService.createPost({ title, content, authorId });
+  res.status(201).json(new ApiResponse(201, post, 'Post created successfully.'));
 });
 
 export const partiallyUpdatePost = (req, res) => {

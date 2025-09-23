@@ -1,19 +1,17 @@
 // src/routes/post.routes.js
+import express from 'express';
 import * as postController from '../controllers/post.controller.js';
-import { validatePost } from '../middlewares/validator.middleware.js';
-import { Router } from 'express';
-import { partiallyUpdatePost } from '../controllers/post.controller.js';  // Adjust path if needed
+import * as commentController from '../controllers/comment.controller.js';
+import { validateComment } from '../middlewares/validator.middleware.js';  // <-- Import here
 
+const router = express.Router();
 
-const router = Router();
-
-router.patch('/posts/:id', partiallyUpdatePost);
-
-router.post('/', validatePost, postController.createPost);
-router.put('/:id', validatePost, postController.updatePost);
-router.patch('/:id', postController.partiallyUpdatePost);
+router.post('/', postController.createPost);
+router.get('/', postController.getAllPosts);
 router.get('/:id', postController.getPostById);
-router.delete('/:id', postController.deletePost);
 
+router.post('/:postId/comments', validateComment, commentController.createCommentForPost);
+router.get('/:postId/comments', commentController.getCommentsByPostId);
 
-export default router;
+export const postRoutes = router;
+
