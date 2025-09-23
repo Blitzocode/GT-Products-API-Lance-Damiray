@@ -1,6 +1,13 @@
-<img width="810" height="93" alt="Screenshot 2025-09-13 145303" src="https://github.com/user-attachments/assets/28eb7907-74ee-483e-81c5-2f05971f9f81" />
-<img width="1249" height="539" alt="first part" src="https://github.com/user-attachments/assets/139e8a37-5fb0-4243-aabf-79c6b01e7f47" />
-<img width="1157" height="686" alt="second part" src="https://github.com/user-attachments/assets/db8f87f1-c2ec-489e-aa6e-307cc59f7cad" />
-<img width="1169" height="582" alt="3rd part" src="https://github.com/user-attachments/assets/34928bf7-2dd4-4be9-8ee6-2a8d4dffddae" />
-<img width="1137" height="675" alt="4th part" src="https://github.com/user-attachments/assets/19007132-7249-49a8-aebc-0f09194437d3" />
-<img width="1218" height="653" alt="5th part" src="https://github.com/user-attachments/assets/a5e30af0-e1c9-42f0-8553-919af91ef95b" />
+PART 4 TESTING
+1 starting server
+<img width="792" height="73" alt="server" src="https://github.com/user-attachments/assets/b1bcf04d-ce51-4036-ba10-d97271e8cd0e" />
+2 creating a user
+<img width="539" height="856" alt="successful 1" src="https://github.com/user-attachments/assets/16fd475f-930a-4afd-814e-01a66a03a070" />
+3 checking a post of the list in the SQL
+<img width="603" height="862" alt="successful 3" src="https://github.com/user-attachments/assets/83930bd1-6e7d-4137-bb61-2c213d41c848" />
+
+4 Error checking creating a user with the same name
+<img width="543" height="736" alt="successful 4 error case" src="https://github.com/user-attachments/assets/4500762a-9534-4890-ab40-30de9543373d" />
+5 error checking checking non existing user
+<img width="543" height="687" alt="successful 5 error case" src="https://github.com/user-attachments/assets/f2d20309-4e6f-4718-8857-1a74be6e33c9" />
+
