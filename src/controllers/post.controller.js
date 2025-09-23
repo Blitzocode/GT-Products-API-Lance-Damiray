@@ -1,33 +1,27 @@
 // src/controllers/post.controller.js
 import * as postServices from '../services/post.services.js';
-
+import { ApiResponse } from '../utils/ApiResponse.js';
+import asyncHandler from 'express-async-handler';
 
     export const getAllPosts = async (req, res) => {
-        try {
-            const posts = await postServices.getAllPosts();
-            res.json(posts);
-        } catch (error) {
-            res.status(500).json({ message: 'Error retrieving posts', error: error.message });
-        }
-    };
-
-export const getPostById = (req, res) => {
-  const postId = parseInt(req.params.id, 10);
-  const post = postServices.getPostById(postId);
-  if (!post) {
-    return res.status(404).json({ message: 'Post not found.' });
-  }
-  res.json(post);
+    try {
+        const posts = await postService.getAllPosts();
+        return res
+            .status(200)
+            .json(new ApiResponse(200, posts, "Posts retrieved successfully"));
+    } catch (error) {
+        //...
+    }
 };
 
-export const createPost = (req, res) => {
-  const { title, content } = req.body;
-  if (!title || !content) {
-    return res.status(400).json({ message: 'Title and content are required.' });
-  }
-  const newPost = postServices.createPost({ title, content });
-  res.status(201).json(newPost);
-};
+export const getPostById = asyncHandler(async (req, res) => {
+    const postId = parseInt(req.params.id, 10);
+    const post = await postService.getPostById(postId);
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, post, "Post retrieved successfully"));
+});
 
 export const updatePost = (req, res) => {
   const postId = parseInt(req.params.id, 10);
@@ -46,7 +40,13 @@ export const deletePost = (req, res) => {
   }
   res.status(204).send();
 };
-
-
-    // (Apply the same async/await and try/catch pattern to all other controller functions:
-    // getPostById, createPost, updatePost, partiallyUpdatePost, and deletePost)
+export const createPost = async (req, res) => {
+    try {
+        // The data is guaranteed to be valid here
+        const newPost = await postService.createPost(req.body);
+        return res
+            .status(201)
+            .json(new ApiResponse(201, newPost, "Post created successfully"));
+    } catch (error) {
+    }
+  };
