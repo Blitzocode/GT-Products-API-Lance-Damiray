@@ -30,8 +30,6 @@ export const validateComment = [
     },
 ];
 
-import { body, validationResult } from 'express-validator';
-
 export const validateRegistration = [
     body('username').trim().notEmpty().withMessage('Username is required.'),
     body('email').isEmail().withMessage('A valid email is required.'),
