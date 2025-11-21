@@ -1,20 +1,80 @@
 // app.js
 import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import swaggerUi from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
 
 const app = express();
 const port = 3000;
 
-app.use(express.json()); // Middleware to parse JSON bodies
+//SECURITY MIDDLEWARE
+app.use(helmet());
 
-// In-memory "database"
+app.use(cors({
+    origin: "http://localhost:5173", // change based on your frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// GLOBAL RATE LIMIT → affects all routes
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15 minutes
+    max: 100,                  // 100 requests per window
+    message: "Too many requests, please try again later."
+});
+app.use(globalLimiter);
+
+// Strict limit for CREATE actions (optional)
+const createLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 5,                   // Only 5 create attempts
+    message: "Too many attempts to create content. Try later."
+});
+
+// JSON BODY PARSER
+app.use(express.json());
+
+const swaggerSpec = swaggerJSDoc({
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Post API",
+            version: "1.0.0",
+            description: "Simple Posts API with In-Memory Storage"
+        },
+    },
+    apis: ["./app.js"], // We will write Swagger comments here
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+//In-memory "database"
 let posts = [
-    { id: 1, title: 'First Post', content: 'This is the first post.' },
-    { id: 2, title: 'Second Post', content: 'This is the second post.' }
+    { id: 1, title: "First Post", content: "This is the first post." },
+    { id: 2, title: "Second Post", content: "This is the second post." }
 ];
 let nextId = 3;
 
-// POST /posts (adds a new post to the array)
-app.post('/posts', (req, res) => {
+
+//API ROUTES (Versioned: /api/v1/posts)
+
+// get request
+app.get('/api/v1/posts', (req, res) => {
+    res.json(posts);
+});
+
+// get
+app.get('/api/v1/posts/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const post = posts.find(p => p.id === id);
+    if (!post) return res.status(404).json({ message: "Post not found." });
+    res.json(post);
+});
+
+// post
+app.post('/api/v1/posts', createLimiter, (req, res) => {
     const { title, content } = req.body;
     if (!title || !content) {
         return res.status(400).json({ message: 'Title and content are required.' });
@@ -24,44 +84,40 @@ app.post('/posts', (req, res) => {
     res.status(201).json(newPost);
 });
 
-// GET /posts (returns the full array)
-app.get('/posts', (req, res) => {
-    res.json(posts);
-});
+//put
+app.put('/api/v1/posts/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const index = posts.findIndex(p => p.id === id);
 
-// GET /posts/:id (finds and returns a single post)
-app.get('/posts/:id', (req, res) => {
-    const postId = parseInt(req.params.id, 10);
-    const post = posts.find(p => p.id === postId);
-    if (!post) {
+    if (index === -1) {
         return res.status(404).json({ message: 'Post not found.' });
     }
-    res.json(post);
-});
 
-// PUT /posts/:id (finds and updates a post)
-app.put('/posts/:id', (req, res) => {
-    const postId = parseInt(req.params.id, 10);
-    const postIndex = posts.findIndex(p => p.id === postId);
-    if (postIndex === -1) {
-        return res.status(404).json({ message: 'Post not found.' });
-    }
     const { title, content } = req.body;
-    posts[postIndex] = { ...posts[postIndex], title: title || posts[postIndex].title, content: content || posts[postIndex].content };
-    res.json(posts[postIndex]);
+    posts[index] = {
+        ...posts[index],
+        title: title || posts[index].title,
+        content: content || posts[index].content
+    };
+
+    res.json(posts[index]);
 });
 
-// DELETE /posts/:id (removes a post from the array)
-app.delete('/posts/:id', (req, res) => {
-    const postId = parseInt(req.params.id, 10);
-    const postIndex = posts.findIndex(p => p.id === postId);
-    if (postIndex === -1) {
+//delete
+app.delete('/api/v1/posts/:id', (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const index = posts.findIndex(p => p.id === id);
+
+    if (index === -1) {
         return res.status(404).json({ message: 'Post not found.' });
     }
-    posts.splice(postIndex, 1);
+
+    posts.splice(index, 1);
     res.status(204).send();
 });
 
+// START SERVER
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
 });
