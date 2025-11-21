@@ -11,7 +11,7 @@ import userRoutes from './src/routes/user.routes.js';
 import { errorHandler } from './src/middlewares/errorHandler.middleware.js';
 
 dotenv.config();
-console.log('JWT_SECRET:', process.env.JWT_SECRET); // Debug line to check if JWT_SECRET is loaded
+console.log('JWT_sercret:', process.env.JWT_SECRET);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
