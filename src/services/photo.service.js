@@ -1,3 +1,4 @@
+// src/services/photo.service.js
 import pool from '../config/db.js';
 import { ApiError } from '../utils/ApiError.js';
 import fs from 'fs/promises'; // Import Node.js file system module
