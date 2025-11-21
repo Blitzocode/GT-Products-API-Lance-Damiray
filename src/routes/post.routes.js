@@ -13,5 +13,4 @@ router.get('/:id', postController.getPostById);
 router.post('/:postId/comments', validateComment, commentController.createCommentForPost);
 router.get('/:postId/comments', commentController.getCommentsByPostId);
 
-export const postRoutes = router;
-
+export default router;

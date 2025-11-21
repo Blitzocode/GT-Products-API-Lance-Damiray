@@ -4,8 +4,10 @@ import { validateRegistration } from '../middlewares/validator.middleware.js';
 
 const router = Router();
 
+// Register route
 router.post('/register', validateRegistration, authController.registerUser);
-router.post('/login', authController.loginUser); // ✅ new route
+
+// Login route
+router.post('/login', authController.loginUser);
 
 export default router;
-
