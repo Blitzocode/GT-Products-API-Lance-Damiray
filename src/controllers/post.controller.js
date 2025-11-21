@@ -22,20 +22,19 @@ export const getPostById = asyncHandler(async (req, res) => {
 
 export const updatePost = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.id, 10);
-    const post = await postService.updatePost(postId, req.body);
-    if (!post) {
-        return res.status(404).json({ message: 'Post not found.' });
-    }
-    return res.json(post);
+    const postData = req.body;
+    const userId = req.user.id; // Get the user ID from the middleware
+
+    const updatedPost = await postService.updatePost(postId, postData, userId);
+    res.status(200).json(new ApiResponse(200, updatedPost, "Post updated successfully"));
 });
 
 export const deletePost = asyncHandler(async (req, res) => {
     const postId = parseInt(req.params.id, 10);
-    const success = await postService.deletePost(postId);
-    if (!success) {
-        return res.status(404).json({ message: 'Post not found.' });
-    }
-    return res.status(204).send();
+    const userId = req.user.id; // Get the user ID from the middleware
+
+    await postService.deletePost(postId, userId);
+    res.status(200).json(new ApiResponse(200, null, "Post deleted successfully"));
 });
 
 export const createPost = asyncHandler(async (req, res) => {

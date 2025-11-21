@@ -12,5 +12,7 @@ router.get('/:id', postController.getPostById);
 
 // PROTECT THIS ROUTE: A user must be logged in to create a post
 router.post('/', authMiddleware, validatePost, postController.createPost);
+router.put('/:id', authMiddleware, validatePost, postController.updatePost);
+router.delete('/:id', authMiddleware, postController.deletePost);
 
 export default router;
