@@ -16,16 +16,18 @@ export const getPostById = async (id) => {
 };
 
 export const createPost = async (postData, authorId) => {
-    const { title, content } = postData; // No longer need authorId from here
+    const { title, content } = postData;
     try {
         const [result] = await pool.query(
             'INSERT INTO posts (title, content, authorId) VALUES (?, ?, ?)',
-            [title, content, authorId] // Use the authorId from the argument
+            [title, content, authorId]
         );
+
         const newPost = await getPostById(result.insertId);
         return newPost;
     } catch (error) {
-        // ... (error handling remains the same)
+        console.error('Error creating post:', error);
+        throw new Error('Failed to create post'); // This will be caught by asyncHandler
     }
 };
 
