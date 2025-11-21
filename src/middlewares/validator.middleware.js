@@ -5,12 +5,9 @@ export const validatePost = [
     body('title').trim().notEmpty().withMessage('Title is required.'),
     body('content').trim().notEmpty().withMessage('Content is required.'),
 
-    // REMOVE THE AUTHORID VALIDATION
-    // body('authorId')...
-
     (req, res, next) => {
         // ...
-    },  
+    },
 ];
 
 export const validateComment = [

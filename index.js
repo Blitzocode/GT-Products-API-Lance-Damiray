@@ -1,5 +1,6 @@
-import express from 'express';
 import dotenv from 'dotenv';
+import express from 'express';
+
 
 import authRoutes from './src/routes/auth.routes.js';
 import postRoutes from './src/routes/post.routes.js';
@@ -10,7 +11,7 @@ import userRoutes from './src/routes/user.routes.js';
 import { errorHandler } from './src/middlewares/errorHandler.middleware.js';
 
 dotenv.config();
-
+console.log('JWT_SECRET:', process.env.JWT_SECRET); // Debug line to check if JWT_SECRET is loaded
 const app = express();
 const PORT = process.env.PORT || 3000;
 

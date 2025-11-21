@@ -1,16 +1,16 @@
 // src/routes/post.routes.js
-import express from 'express';
+import { Router } from 'express';
 import * as postController from '../controllers/post.controller.js';
-import * as commentController from '../controllers/comment.controller.js';
-import { validateComment } from '../middlewares/validator.middleware.js';  // <-- Import here
+import { validatePost } from '../middlewares/validator.middleware.js';
+import { authMiddleware } from '../middlewares/auth.middleware.js'; // IMPORT
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', postController.createPost);
+// ... (GET routes can remain public)
 router.get('/', postController.getAllPosts);
 router.get('/:id', postController.getPostById);
 
-router.post('/:postId/comments', validateComment, commentController.createCommentForPost);
-router.get('/:postId/comments', commentController.getCommentsByPostId);
+// PROTECT THIS ROUTE: A user must be logged in to create a post
+router.post('/', authMiddleware, validatePost, postController.createPost);
 
 export default router;

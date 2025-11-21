@@ -1,7 +1,7 @@
 import pool from '../config/db.js';
+import { ApiError } from '../utils/ApiError.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { ApiError } from '../utils/ApiError.js';
 
 export const registerUser = async (userData) => {
   const { username, email, password } = userData;
@@ -12,8 +12,8 @@ export const registerUser = async (userData) => {
 
   try {
     // Hash the password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const salt = await bcrypt.genSalt(10);
+const hashedPassword = await bcrypt.hash(password, salt);
 
     // Insert user into DB
     const [result] = await pool.query(
@@ -37,36 +37,33 @@ export const registerUser = async (userData) => {
 };
 
 export const loginUser = async (loginData) => {
-  const { email, password } = loginData;
+    const { email, password } = loginData;
 
-  if (!email || !password) {
-    throw new ApiError(400, "Email and password are required");
-  }
-
-  try {
-    // Find user by email
+    // 1. Find the user by email
     const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (rows.length === 0) throw new ApiError(401, 'Invalid credentials');
-
+    if (rows.length === 0) {
+        throw new ApiError(401, "Invalid credentials"); // Use a generic error
+    }
     const user = rows[0];
 
-    // Compare password
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) throw new ApiError(401, 'Invalid credentials');
+    // 2. Compare the provided password with the stored hash
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+        throw new ApiError(401, "Invalid credentials"); // Same generic error
+    }
 
-    // Sign JWT
-    if (!process.env.JWT_SECRET) throw new ApiError(500, "JWT_SECRET not set");
+    // 3. If password matches, generate a JWT
+    const payload = {
+        id: user.id,
+        username: user.username,
+        email: user.email
+    };
 
-    const payload = { id: user.id, username: user.username, email: user.email };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '1h' // Token will expire in 1 hour
+    });
 
     return token;
-
-  } catch (error) {
-    console.error('Error in loginUser:', error);
-    if (error instanceof ApiError) throw error;
-    throw new ApiError(500, "Login failed");
-  }
 };
 
 export const getUserById = async (id) => {
