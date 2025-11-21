@@ -3,52 +3,84 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { ApiError } from '../utils/ApiError.js';
 
+export const registerUser = async (userData) => {
+  const { username, email, password } = userData;
+
+  if (!username || !email || !password) {
+    throw new ApiError(400, "Username, email, and password are required");
+  }
+
+  try {
+    // Hash the password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Insert user into DB
+    const [result] = await pool.query(
+      'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
+      [username, email, hashedPassword]
+    );
+
+    // Fetch the newly created user (exclude password)
+    const newUser = await getUserById(result.insertId);
+    return newUser;
+
+  } catch (error) {
+    console.error('Error in registerUser:', error);
+
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw new ApiError(409, "Username or email already exists");
+    }
+
+    throw new ApiError(500, "Failed to register user");
+  }
+};
+
 export const loginUser = async (loginData) => {
   const { email, password } = loginData;
 
-  // 1. Find user
-  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-  if (rows.length === 0) throw new ApiError(401, 'Invalid credentials');
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
 
-  const user = rows[0];
+  try {
+    // Find user by email
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length === 0) throw new ApiError(401, 'Invalid credentials');
 
-  // 2. Compare password
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) throw new ApiError(401, 'Invalid credentials');
+    const user = rows[0];
 
-  // 3. Sign JWT
-  const payload = { id: user.id, username: user.username, email: user.email };
-  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Compare password
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) throw new ApiError(401, 'Invalid credentials');
 
-  return token;
-};
+    // Sign JWT
+    if (!process.env.JWT_SECRET) throw new ApiError(500, "JWT_SECRET not set");
 
-export const registerUser = async ({ username, email, password }) => {
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await pool.query(
-            'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-            [username, email, hashedPassword]
-        );
-        const newUser = await getUserById(result.insertId);
-        return newUser;
-    } catch (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-            throw new ApiError(409, "Username or email already exists.");
-        }
-        throw error;
-    }
+    const payload = { id: user.id, username: user.username, email: user.email };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    return token;
+
+  } catch (error) {
+    console.error('Error in loginUser:', error);
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(500, "Login failed");
+  }
 };
 
 export const getUserById = async (id) => {
-    const [rows] = await pool.query('SELECT id, username, email, createdAt FROM users WHERE id = ?', [id]);
-    if (rows.length === 0) {
-        throw new ApiError(404, "User not found");
-    }
-    return rows[0];
+  const [rows] = await pool.query(
+    'SELECT id, username, email, createdAt FROM users WHERE id = ?',
+    [id]
+  );
+  if (!rows.length) throw new ApiError(404, "User not found");
+  return rows[0];
 };
 
 export const getAllUsers = async () => {
-    const [users] = await pool.query('SELECT id, username, email, createdAt FROM users');
-    return users;
+  const [users] = await pool.query(
+    'SELECT id, username, email, createdAt FROM users'
+  );
+  return users;
 };
